@@ -1,0 +1,63 @@
+Tokenization:
+	Involves breaking a text document into pieces that a machien can understand
+	
+Part of Speech Tagging (PoS):
+	Identifying each tokens part of speech and tagging it.
+	
+Named Entity Recognition:
+	Named entities are people, places and things mentioned ina text document.
+	
+Sentiment Analysis:
+	Determining whether a piece of writing is positive, negative or neutral, and then assigning a weighted sentiment score.
+	
+
+Unsupervised Machine Learning for NLP and TA:
+	Clustering
+	Latent Semantic Indexing (LSI)
+	Matrix Factorization:
+		Breaks down a large matrix down into the combination of two smaller matrices.
+		"I threw a ball over the mountain" - threw is closer to ball vs. mountain
+	
+	
+
+####Text Analytics for Beginners using Python NLTK
+https://medium.com/@avinashnvln8/text-analytics-for-beginners-using-python-nltk-dac7caca8aa2
+
+Text Analytics and NLP:
+	Tokenization is the first step in text analytics
+	
+	Stopwords:
+		Stopwords are considered noise in text: Text may contain stop words such as is, am, are, this etc..
+		To remove stopwords, we create a list of stopwords and filter out list of tokens from these words
+		
+	Lexicon Normalzation:
+		is a broader term used for further word 'noise' reduction.
+		
+		Stemmming:
+			2 Main Options: PorterStemmer(older) and LancasterStammer(newer)
+			Reduces words to their root. Ex: Connection, connected, connecting = connect
+		Lemmatization:
+			Reduces to their base word with linguistically correct lemmas. Usually more sophisticated than stemming
+	
+	POS Tagging:
+		Determines if a owrds is a noun, pronoun, adjective, verb, adverb. POS Tagging looks for relationships within the sentence
+		
+	
+	Model Process:
+		Tokenization
+		Pre-Processing:
+			Removing Stop Words
+			Stemming and Lemmatization
+		Feature Engineering:
+			Bag of Word
+			TF-IDF
+			Word Embedding
+		Model Building
+		Model Eval
+		
+	
+			
+				
+			
+		
+	
