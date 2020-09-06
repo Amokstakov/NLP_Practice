@@ -12,6 +12,7 @@ plaidml-keras = "*"
 plaidbench = "*"
 pyopencl = "*"
 nltk = "*"
+gensim = "*"
 
 [requires]
 python_version = "3.8"
