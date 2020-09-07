@@ -33,7 +33,6 @@ def clean_text(text, vocab):
     tokens = ' '.join(tokens)
     return tokens
 
-
 #process through all the text files in the folders
 def process_paths(filepath,vocab,is_train):
     lines = list()
@@ -49,6 +48,25 @@ def process_paths(filepath,vocab,is_train):
         lines.append(tokens)
     return lines
 
+def load_embedding(filename):
+    file = open(filename,'r')
+    #skips the header created from wv.save_word2vec_format
+    lines = file.readlines()[1:]
+    file.close()
+    #create a mapping of words to vectors
+    embedding = dict()
+    for line in lines:
+        parts = line.split()
+        #key is tring, value is np.arracy for the vector
+        embedding[parts[0]] = np.asarray(parts[1:], dtype="float32")
+    return embedding
+
+def get_weight_matrix(embedding, vocab):
+    vocab_size = len(vocab) + 1
+    weight_matrix = np.zeros((vocab_size,100))
+    for word,i in vocab.items():
+        weight_matrix[i] = embedding.get(word)
+    return weight_matrix
 
 #load the vocab
 vocab = load_text('vocab.txt')
@@ -86,16 +104,19 @@ encoded_docs = tokenizer.texts_to_sequences(testing_docs)
 x_test = tf.keras.preprocessing.sequence.pad_sequences(encoded_docs,maxlen=max_len, padding='post')
 y_test = np.array([0 for _ in range(100)] + [1 for _ in range(100)])
 
-
 vocab_size = len(tokenizer.word_index) + 1
 
-def create_model(x,y, vocab_size, max_len):
+#import the embedding layer
+raw_embedding = load_embedding('embedding_word2vec.txt')
+embedding_vectors = get_weight_matrix(raw_embedding, tokenizer.word_index)
+
+
+def create_model(x,y, vocab_size, max_len, embedding_vectors):
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Embedding(vocab_size, 100, input_length=max_len),
-        tf.keras.layers.Conv1D(filters=32, kernel_size=8, activation='relu'),
+        tf.keras.layers.Embedding(vocab_size, 100,weights=[embedding_vectors] ,input_length=max_len, trainable=False),
+        tf.keras.layers.Conv1D(filters=128, kernel_size=5, activation='relu'),
         tf.keras.layers.MaxPooling1D(pool_size=2),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(10, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
 
@@ -106,7 +127,7 @@ def create_model(x,y, vocab_size, max_len):
     return model
 
 
-model = create_model(x_train, y_train, vocab_size, max_len)
+model = create_model(x_train, y_train, vocab_size, max_len,embedding_vectors)
 
 loss,acc = model.evaluate(x_test,y_test)
 

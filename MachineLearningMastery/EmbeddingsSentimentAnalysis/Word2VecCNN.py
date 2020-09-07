@@ -8,7 +8,8 @@ Link:
 import os
 import sys
 import string
-
+import numpy as np
+import tensorflow as tf
 
 #import the word2vec model 
 from gensim.models import Word2Vec
@@ -49,14 +50,29 @@ def process_paths(filepath,vocab, is_train):
         lines += clean_lines
     return lines
 
+#Using the Pre-trained Embeddings
+"""
+We need to load the word embeddings as a directory of words to vectors. 
+"""
+
 #Import Vocab and split to create a list where we only keep the unique words
 vocab = load_text('vocab.txt')
 vocab = vocab.split() 
 vocab = set(vocab)
 
-
 positive_lines = process_paths('txt_sentoken/pos/',vocab,True)
 negative_lines = process_paths('txt_sentoken/neg/',vocab,True)
 sentences = positive_lines + negative_lines
-print(len(sentences))
+
+
+# train the word2vec model
+model = Word2Vec(sentences, size=100, window=5, workers=8, min_count=1)
+words = list(model.wv.vocab)
+
+# save the word embeddings
+filename = "embedding_word2vec.txt"
+model.wv.save_word2vec_format(filename, binary=False)
+
+
+
 
