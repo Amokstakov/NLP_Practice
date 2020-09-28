@@ -45,7 +45,6 @@ def save_vocab(name,vocab):
     file.close()
 
 
-
 #define my vocab bro
 vocab = Counter()
 
