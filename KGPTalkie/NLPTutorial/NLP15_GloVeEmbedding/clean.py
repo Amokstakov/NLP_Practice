@@ -14,7 +14,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Dense, Flatten, Dropout, Embedding, Activation, Conv1D, MaxPooling1D, GlobalMaxPooling1D
 
-df = pd.read_csv('../../Data/twitter-data-master/twitter4000.csv')
+df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv')
 
 text = ' '.join(df['twitts'])
 text = text.split()
@@ -63,7 +63,8 @@ X = pad_sequences(encoded_text, maxlen=max_len, padding='post')
 # The embedding layer will contain words represented in 200 dimension
 
 glove_vectors = dict()
-file = open('../../Data/glove.twitter.27B.200d.txt', encoding='utf-8')
+file = open('../../../../Data/glove.twitter.27B.200d.txt',
+            encoding='utf-8')
 
 # Create the word embeddings
 for line in file:
@@ -97,9 +98,9 @@ model.add(Embedding(vocab_size, vec_size, input_length=max_len,
                     weights=[word_vector_matrix], trainable=False))
 model.add(Conv1D(64, 8, activation="relu"))
 model.add(MaxPooling1D(2))
-model.add(Dropout(0.3))
+model.add(Dropout(0.5))
 model.add(Dense(32, activation='relu'))
-model.add(Dropout(0.2))
+model.add(Dropout(0.5))
 model.add(Dense(16, activation='relu'))
 model.add(GlobalMaxPooling1D())
 model.add(Dense(1, activation='sigmoid'))
