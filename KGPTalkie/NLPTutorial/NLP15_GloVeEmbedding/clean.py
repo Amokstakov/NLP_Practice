@@ -5,23 +5,26 @@ This script will follow a very similar sentiment analysis as the previous tutori
 # imports
 import re
 import sys
+import spacy
+import unicodedata
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 from textblob import TextBlob
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Sequential
+from spacy.lang.en.stop_words import STOP_WORDS
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Dense, Flatten, Dropout, Embedding, Activation, Conv1D, MaxPooling1D, GlobalMaxPooling1D
 
-sys.path.insert(1, '../../../../../SentimentAnalysisonTwitterData')
-from prep import contractions
+sys.path.insert(1, '../../../../SentimentAnalysis/Tutorial3/')
+from prep import contractions 
 
 nlp = spacy.load('en_core_web_md')
 
-df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv')
+df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv',nrows=100)
 # df = df.dropna()
 
 
@@ -77,13 +80,13 @@ def get_cleat_text(text):
 
 def get_clean_data(x):
     if type(x) is str:
-        # go through multiple steps of cleaning
-
+        print(x)
         # # turn everything into lower case
         x = x.lower()
 
         # # remove all emails
         x = re.sub('([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+)', "", x)
+
         # remove all @ first
         x = re.sub(r'@([A-Za-z0-9_]+)', "", x)
 
@@ -128,13 +131,18 @@ def get_clean_data(x):
         # # remove all the words in our STOP_WORDS
         x = [words for words in x if words not in STOP_WORDS]
 
+        print('-----')
+        print(x)
+
         return " ".join(x)
     else:
         return x
 
 
 # df['twitts'] = df['twitts'].apply(lambda x: get_cleat_text(x))
-df['twitts'] = df['twitts'].apply(lambda x: get_clean_text(x))
+df['twitts'] = df['twitts'].apply(lambda x: get_clean_data(x))
+
+sys.exit()
 
 # convert from series to a list
 text = df['twitts'].tolist()
