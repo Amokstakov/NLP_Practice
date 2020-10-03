@@ -1,5 +1,5 @@
 """
-This script will follow a very similar sentiment analysis as the previous tutorial but we will use pre-trained GloVe embeddings
+This script will follow a very similar Sentiment analysis as the previous tutorial but we will use pre-trained GloVe embeddings
 """
 
 # imports
@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Sequential
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -15,11 +16,13 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Dense, Flatten, Dropout, Embedding, Activation, Conv1D, MaxPooling1D, GlobalMaxPooling1D
 
 df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv')
+df = df.dropna()
 
-text = ' '.join(df['twitts'])
-text = text.split()
-freq_comm = pd.Series(text).value_counts()
-rare = freq_comm[freq_comm.values == 1]
+
+# text = ' '.join(df['Tweets'])
+# text = text.split()
+# freq_comm = pd.Series(text).value_counts()
+# rare = freq_comm[freq_comm.values == 1]
 
 
 def get_cleat_text(text):
@@ -27,7 +30,7 @@ def get_cleat_text(text):
         text = text.lower()
         # find and replace all emails
         text = re.sub(
-            "([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", '', text)
+        "([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", '', text)
         # find and replace all websites
         text = re.sub(r'^https?:\/\/.*[\r\n]*', '',  text)
         # find and replace all RT
@@ -40,12 +43,12 @@ def get_cleat_text(text):
         return text
 
 
-df['twitts'] = df['twitts'].apply(lambda x: get_cleat_text(x))
+# df['Tweets'] = df['Tweets'].apply(lambda x: get_cleat_text(x))
 
 # convert from series to a list
-text = df['twitts'].tolist()
+text = df['Tweets'].tolist()
 
-y = df['sentiment']
+y = df['Sentiment']
 
 token = Tokenizer()
 token.fit_on_texts(text)
@@ -105,7 +108,7 @@ model.add(Dense(16, activation='relu'))
 model.add(GlobalMaxPooling1D())
 model.add(Dense(1, activation='sigmoid'))
 
-model.compile(optimizer='adam', loss='binary_crossentropy',
+model.compile(optimizer=Adam(learning_rate=0.0001), loss='binary_crossentropy',
               metrics=['accuracy'])
 
 model.fit(x_train, y_train, epochs=30, validation_data=(x_test, y_test))
