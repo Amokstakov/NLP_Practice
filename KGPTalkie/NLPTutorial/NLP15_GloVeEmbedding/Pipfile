@@ -10,6 +10,8 @@ tensorflow = "*"
 pandas = "*"
 numpy = "*"
 scikit-learn = "*"
+spacy = "*"
+textblob = "*"
 
 [requires]
 python_version = "3.8"

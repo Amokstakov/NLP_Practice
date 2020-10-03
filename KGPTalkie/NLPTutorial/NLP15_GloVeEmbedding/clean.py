@@ -1,5 +1,5 @@
 """
-This script will follow a very similar Sentiment analysis as the previous tutorial but we will use pre-trained GloVe embeddings
+This script will follow a very similar sentiment analysis as the previous tutorial but we will use pre-trained GloVe embeddings
 """
 
 # imports
@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from textblob import TextBlob
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Sequential
 from sklearn.model_selection import train_test_split
@@ -15,14 +16,46 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Dense, Flatten, Dropout, Embedding, Activation, Conv1D, MaxPooling1D, GlobalMaxPooling1D
 
+sys.path.insert(1, '../../../../../SentimentAnalysisonTwitterData')
+from prep import contractions
+
+nlp = spacy.load('en_core_web_md')
+
 df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv')
-df = df.dropna()
+# df = df.dropna()
 
 
-# text = ' '.join(df['Tweets'])
-# text = text.split()
-# freq_comm = pd.Series(text).value_counts()
-# rare = freq_comm[freq_comm.values == 1]
+# Find most frequent and rarest word ocrruences
+text = ' '.join(df['twitts'])
+text = text.split()
+freq_ = pd.Series(text).value_counts()
+Top_10 = freq_[:10]
+
+Least_freq = freq_[freq_.values == 1]
+
+
+# Clean the data
+
+def contractions_replace(x):
+    if type(x) is str:
+        for key in contractions:
+            value = contractions[key]
+            x = x.replace(key, value)
+        return x
+    return x
+
+def get_base_lemma(x):
+    x = str(x)
+    x_list = []
+    doc = nlp(x)
+    
+    for token in doc:
+        lemma = token.lemma_
+        if lemma == '-PRON-' or lemma == 'be':
+            lemma = token.text
+        x_list.append(lemma)
+
+    return ' '.join(x_list)
 
 
 def get_cleat_text(text):
@@ -37,18 +70,76 @@ def get_cleat_text(text):
         text = re.sub('RT', "", text)
         # find and replace all non-alpha numerical valu
         text = re.sub(r'[^A-Z a-z]+', '', text)
-        text = ' '.join([t for t in text.split() if t not in rare])
+        text = ' '.join([t for t in text.split() if t not in Least_freq])
         return text
     else:
         return text
 
+def get_clean_data(x):
+    if type(x) is str:
+        # go through multiple steps of cleaning
 
-# df['Tweets'] = df['Tweets'].apply(lambda x: get_cleat_text(x))
+        # # turn everything into lower case
+        x = x.lower()
+
+        # # remove all emails
+        x = re.sub('([a-z0-9+._-]+@[a-z0-9+._-]+\.[a-z0-9+_-]+)', "", x)
+        # remove all @ first
+        x = re.sub(r'@([A-Za-z0-9_]+)', "", x)
+
+        # # remove all # first
+        x = re.sub(r'#([A-Za-z0-9_]+)', "", x)
+
+        # # remove and strip all retweets (RT)
+        x = re.sub(r'\brt:\b', '', x).strip()
+
+        # # remove all websites
+        # # TODO: Figure out how it works for all possible website protocols
+        x = re.sub(
+            r'(http|https|ftp|ssh)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?', '', x)
+
+        # # fix all potential spelling mistakes
+        x = str(TextBlob(x).correct())
+
+        # # clean and replace with contractions
+        x = contractions_replace(x)
+
+        # # remove all numerical values
+        x = re.sub(r'[0-9]+', "", x)
+
+        # # remove all special characters
+        x = re.sub(r'[^\w ]+', ' ', x)
+
+        # #Remove accented characters
+        x = unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('utf-8', 'ignore')
+
+        # #Make base form of words AKA Lemmatize w/SPACY
+        x = get_base_lemma(x)
+
+        # # split aka tokenize our tweets
+        x = x.split()
+
+        # # We are removed all the workds that are in our top 10
+        x = [words for words in x if words not in Top_10]
+
+        # # We are rempoving all the words that are not in our rare list
+        x = [words for words in x if words not in Least_freq]
+
+        # # remove all the words in our STOP_WORDS
+        x = [words for words in x if words not in STOP_WORDS]
+
+        return " ".join(x)
+    else:
+        return x
+
+
+# df['twitts'] = df['twitts'].apply(lambda x: get_cleat_text(x))
+df['twitts'] = df['twitts'].apply(lambda x: get_clean_text(x))
 
 # convert from series to a list
-text = df['Tweets'].tolist()
+text = df['twitts'].tolist()
 
-y = df['Sentiment']
+y = df['sentiment']
 
 token = Tokenizer()
 token.fit_on_texts(text)
