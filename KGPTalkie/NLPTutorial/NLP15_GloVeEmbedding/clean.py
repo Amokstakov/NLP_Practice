@@ -24,7 +24,7 @@ from prep import contractions
 
 nlp = spacy.load('en_core_web_md')
 
-df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv',nrows=100)
+df = pd.read_csv('../../../../Data/twitter-data-master/twitter4000.csv')
 # df = df.dropna()
 
 
@@ -80,7 +80,6 @@ def get_cleat_text(text):
 
 def get_clean_data(x):
     if type(x) is str:
-        print(x)
         # # turn everything into lower case
         x = x.lower()
 
@@ -123,16 +122,13 @@ def get_clean_data(x):
         x = x.split()
 
         # # We are removed all the workds that are in our top 10
-        x = [words for words in x if words not in Top_10]
+        # x = [words for words in x if words not in Top_10]
 
         # # We are rempoving all the words that are not in our rare list
-        x = [words for words in x if words not in Least_freq]
+        # x = [words for words in x if words not in Least_freq]
 
         # # remove all the words in our STOP_WORDS
-        x = [words for words in x if words not in STOP_WORDS]
-
-        print('-----')
-        print(x)
+        # x = [words for words in x if words not in STOP_WORDS]
 
         return " ".join(x)
     else:
@@ -141,8 +137,6 @@ def get_clean_data(x):
 
 # df['twitts'] = df['twitts'].apply(lambda x: get_cleat_text(x))
 df['twitts'] = df['twitts'].apply(lambda x: get_clean_data(x))
-
-sys.exit()
 
 # convert from series to a list
 text = df['twitts'].tolist()
